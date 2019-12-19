@@ -1,0 +1,43 @@
+We can create pod in 3 diff ways:-
+
+1. using kubectl run (deprecated)
+
+kubectl run <name> --image=<image>
+
+
+2. Using Deployment
+
+kubectl create deployment <name> --image=<image>
+
+
+3. Create a new yaml file to contain the pod definition. Use whatever editor you like, but we used vi:
+
+vi my-pod.yml
+
+my-pod.yml:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', 'echo Hello Kubernetes! && sleep 3600']
+
+
+Create a pod from the yaml definition file:
+kubectl create -f my-pod.yml
+
+
+Edit a pod by updating the yaml definiton and re-applying it:
+kubectl apply -f my-pod.yml
+
+
+You can also edit a pod like this(only limited properties):
+kubectl edit pod my-pod
+
+
+You can delete a pod like this:
+kubectl delete pod my-pod

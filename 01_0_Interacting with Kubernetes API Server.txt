@@ -1,0 +1,31 @@
+Interacting with Kubernetes API Server:-
+
+1. Using CLI with kubectl and kubeadm
+
+List all the nodes in the cluster.
+List all the pods within all the namespaces.
+List all the namespaces.
+See if there are any pods running in the default namespace.
+Find the IP address of the API server running on the master node.
+See if there are any deployments.
+Find the label applied to the etcd pod on the master node.
+
+
+2. With kubectl proxy
+
+kubectl proxy --port=8080 &
+
+curl http://localhost:8080/api
+curl http://localhost:8080/api/v1
+curl http://localhost:8080/api/v1/pods
+curl http://localhost:8080/api/v1/services
+curl http://localhost:8080/api/v1/services
+...and so on
+
+
+3. Without kubectl proxy 
+Run below command to get the token for the default service account and make a call to the api server passing the token:-
+
+kubectl describe secret
+
+curl $APISERVER/api --header "Authorization: Bearer $TOKEN" --insecure

@@ -1,0 +1,13 @@
+Learning Objectives:-
+Perform a rolling update of the container version
+Roll back to the previous working state
+
+
+Problem Statement:-
+Your company's developers have just finished developing a new version of their candy-themed mobile game. They are ready to update the backend services that are running in your Kubernetes cluster. There is a deployment in the github @ https://github.com/satyensingh/full-kubernetes-training.git managing the replicas for this application. The deployment is called candy-deployment.yaml. You have been asked to create the deployment from the yaml file in your cluster 
+
+Once you have created the deployment, check if the deployment is successully up and running all the replicas.
+
+Now, update the image for the container named candy-ws in this deployment template to a new version, linuxacademycontent/candy-service:3.
+
+After you have updated the image using a rolling update, check on the status of the update to make sure it is working. If it is not working, perform a rollback to the previous state.

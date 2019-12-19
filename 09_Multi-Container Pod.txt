@@ -1,0 +1,61 @@
+Multi-container pods provide an opportunity to enhance containers with helper containers that provide additional functionality. 
+Multi-Container Pods are simply pods with more than one container that all work together as a single unit.
+
+It is often a good idea to keep containers separate by keeping them in their own separate pods, but there are several cases where multi-container pods can be beneficial.
+
+We can create multi-container pods by listing multiple containers in the pod definition.
+
+Here, we cover the basics of what multi-container pods are and how they are created. We will also discuss the primary ways that containers can interact with each other within the same pod, as well as the three main multi-container pod design patterns: sidecar, ambassador, and adapter.
+
+
+Relevant Documentation:-
+https://kubernetes.io/docs/concepts/cluster-administration/logging/#using-a-sidecar-container-with-the-logging-agent
+https://kubernetes.io/docs/tasks/access-application-cluster/communicate-containers-same-pod-shared-volume/
+https://kubernetes.io/blog/2015/06/the-distributed-system-toolkit-patterns/
+
+
+Lesson Reference:-
+Here is the YAML used to create a simple multi-container pod:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: multi-container-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.15.8
+    ports:
+    - containerPort: 80
+  - name: busybox-sidecar
+    image: busybox
+    command: ['sh', '-c', 'while true; do sleep 30; done;']
+
+
+NOTE:- All listening ports are accessible to other containers in the pod, even if they are not exposed outside the pod.
+
+How can containers interact with one another in a Pod?
+1. Shared Network
+All listening ports are accessible to other containers in the pod, even if they are not exposed outside the pod.
+
+2. Shared Storage Volumes
+Caontainers can interact with each other by reading and writing files in a shared storage volume that is mounted within both containers.
+
+3. Shared Process Namespace
+With process namespace sharing enabled, containers in the same pod can interact with and signal one another's processes.
+Enable process namespace sharing by setting "shareProcessNamespace: true" in the pod spec.
+
+
+
+Design Patterns for Multi-Container Pods:-
+1) Sidecar Pod
+	The Sidecar pattern uses a sidecar container that enhances or adds the functionslity to the main container in some way.
+	This could be something like, for example, a sidecar that syncs files from git repo to the file system in a web server container
+	
+2) Ambassador Pod
+	The ambassador pattern uses an ambassador container to accept network traffic and pass it on to the main container.
+	One example might be an ambassador  that listens on a custom port, and forwards traffic to the main container on it's hard-coded port.
+
+3) Adapter Pod
+	The adapter pattern uses an adapter container to change the output of the main container in some way.
+	An example could be an adapter that formats and decorates log output from the main container.

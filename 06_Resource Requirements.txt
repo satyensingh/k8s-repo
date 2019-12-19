@@ -1,0 +1,40 @@
+Kubernetes is a powerful tool for managing and utilizing available resources to run containers. Resource requests and limits provide a great deal of control over how resources will be allocated. Here, we will talk about what resource requests and limits do, and also demonstrate how to set resource requests and limits for a container.
+
+A container's memory and CPU requirements are defined in terms of resource requests and limits.
+
+Resource request:- The amount of resources necessary to run a container. A Pod will only be run on a node that has enough available resources to run the pod's containers.
+
+Resource limit: A maximum value for the resource usage of a container.
+
+
+Relevant Documentation:-
+https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#resource-requests-and-limits-of-pod-and-container
+
+
+Lesson Reference:-
+Specify resource requests and resource limits in the container spec like this:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-resource-pod
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox
+    command: ['sh', '-c', 'echo Hello Kubernetes! && sleep 3600']
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+
+
+
+Memory is measured in bytes. 64Mi means 64 Mebibytes.
+
+CPU is measured in "cores". 250m means 250 milliCPUs
+1000m = 1 CPU cores
+250m = 0.25 CPU cores
