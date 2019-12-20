@@ -7,7 +7,6 @@ metadata:
 spec:
   volumes:
     - name: vol1
-
   containers:
   - name: myapp
     image: nginx:1.7.9
