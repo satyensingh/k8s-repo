@@ -1,0 +1,188 @@
+The application is the user-facing part of an online shop that sells socks. It is intended to aid the demonstration and testing of microservice deployment on Kubernetes.
+
+It is built using Spring Boot, Go kit and Node.js and is packaged in Docker containers.
+
+The architecture of the demo microserivces application was intentionally designed to provide as many microservices as possible. If you are considering your own design, we would recommend the iterative approach, whereby you only define new microservices when you see issues (performance/testing/coupling) developing in your application.
+
+Furthermore, it is intentionally polyglot to exercise a number of different technologies. Again, we'd recommend that you only consider new technologies based upon a need.
+
+As seen in the image above, the microservices are roughly defined by the function in an ECommerce site. Networks are specified, but due to technology limitations may not be implemented in some deployments.
+
+All services communicate using REST over HTTP. This was chosen due to the simplicity of development and testing. Their API specifications are under development.
+
+
+Refer Architecture.png for diagramatic view of this app
+
+--------------------------------------------------------------------------------------------------------------
+
+deployment.apps/carts-db
+service/carts-db 
+deployment.apps/carts
+service/carts
+
+deployment.apps/user-db 
+service/user-db
+deployment.apps/user
+service/user 
+
+deployment.apps/catalogue-db
+service/catalogue-db
+deployment.apps/catalogue
+service/catalogue
+
+deployment.apps/orders-db 
+service/orders-db 
+deployment.apps/orders 
+service/orders 
+
+
+deployment.apps/payment
+service/payment
+
+
+deployment.apps/queue-master 
+service/queue-master
+
+
+deployment.apps/rabbitmq
+service/rabbitmq 
+
+
+deployment.apps/shipping
+service/shipping
+
+
+deployment.apps/front-end
+service/front-end 
+
+------------------------------------------------------------------------------------------------------------------
+
+front-end
+	image=weaveworksdemos/front-end:0.3.12
+	resources.requests.cpu=100m
+			memory=100Mi
+	containerPort: 8079
+	runAsNonRoot=true
+	runAsUser=10001
+	
+orders
+	image=weaveworksdemos/orders:0.4.7
+	env.name=ZIPKIN
+	    value= zipkin.jaeger.svc.cluster.local
+	    name= JAVA_OPTS
+	    value= -Xms64m -Xmx128m -XX:PermSize=32m -XX:MaxPermSize=64m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom
+	containerPort= 80
+	runAsNonRoot= true
+	runAsUser= 10001
+	volumeMounts.mountPath=/tmp
+	             name=tmp-volume
+	volumes.name= tmp-volume
+	        emptyDir.medium= Memory
+			
+orders-db (MongoDB)
+	replicas= 1
+	image= mongo
+	ports.name= mongo
+	      containerPort= 27017
+	    mountPath: /tmp
+	    name: tmp-volume
+	volumes:
+		name: tmp-volume
+	    emptyDir:
+	    	medium: Memory
+			
+payment
+	replicas= 1
+	image= weaveworksdemos/payment:0.4.3
+	containerPort= 80
+	runAsNonRoot= true
+	runAsUser= 10001
+	
+user-db (mongodb)
+ 	replicas= 1
+    image= weaveworksdemos/user-db:0.4.0
+    containerPort= 27017
+        volumeMounts=
+        - mountPath= /tmp
+          name=tmp-volume
+      volumes:
+        - name=tmp-volume
+          emptyDir:
+            medium=Memory
+			
+user (App Logic)
+  replicas: 1
+  image=weaveworksdemos/user:0.4.7
+  containerPort=80
+        env-variable:
+          name: MONGO_HOST
+          value: <user-db service name>:27017
+  runAsNonRoot: true
+  runAsUser: 10001
+
+
+catalogue 
+	image=weaveworksdemos/catalogue:0.3.5
+	containerPort=80
+	runAsNonRoot=true
+	runAsUser=10001
+	
+catalogue-db (MySQL)
+	image=weaveworksdemos/catalogue-db:0.3.0
+	env-variable
+		key=MYSQL_ROOT_PASSWORD
+		value=fake_password
+		key=MYSQL_DATABASE
+		value=socksdb
+	containerPort=3306
+	
+
+queue-master
+	replicas=1
+	image= weaveworksdemos/queue-master:0.3.1
+	containerPort= 80
+		
+
+carts (App Logic)
+	image=weaveworksdemos/carts:0.4.8
+	ports.containerPort=80
+	env-variable
+		Key= ZIPKIN
+		value= zipkin.jaeger.svc.cluster.local
+		key= JAVA_OPTS
+		value= -Xms64m -Xmx128m -XX:PermSize=32m -XX:MaxPermSize=64m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom
+	runAsNonRoot=true
+	runAsUser=10001
+
+
+carts-db (MongoDB)
+	image=mongo
+	replicas=1
+	ports.containerPort=27017
+	ports.name=mongo
+
+
+shipping
+	replicas: 1
+    image: weaveworksdemos/shipping:0.4.8
+    env-variable
+          key: ZIPKIN
+          value: zipkin.jaeger.svc.cluster.local
+          key: JAVA_OPTS
+          value: -Xms64m -Xmx128m -XX:PermSize=32m -XX:MaxPermSize=64m -XX:+UseG1GC -Djava.security.egd=file:/dev/urandom
+    containerPort: 80
+    runAsNonRoot: true
+    runAsUser: 10001
+    volumeMounts:
+      mountPath: /tmp
+      name: tmp-volume
+    volumes:
+      name: tmp-volume
+      emptyDir:
+          medium: Memory
+
+
+rabbitmq
+	replicas= 1
+	image= rabbitmq:3.6.8
+    containerPort= 5672
